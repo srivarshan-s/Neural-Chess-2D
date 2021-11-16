@@ -102,7 +102,7 @@ if __name__ == "__main__":
       all_loss += loss.item()
       num_loss += 1
 
-    print("%3d: %f" % (epoch, all_loss/num_loss))
+    print("%3d: loss=%f" % (epoch, all_loss/num_loss))
     torch.save(model.state_dict(), "nets/value.pth")
 
 
