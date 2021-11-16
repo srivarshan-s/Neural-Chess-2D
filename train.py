@@ -68,7 +68,7 @@ class Net(nn.Module):
 if __name__ == "__main__":
   device = "cuda"
 
-  NUM_EPOCHS = 10
+  NUM_EPOCHS = 100
 
   chess_dataset = ChessValueDataset()
   train_loader = torch.utils.data.DataLoader(chess_dataset, batch_size=256, shuffle=True)
