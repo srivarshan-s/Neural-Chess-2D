@@ -8,22 +8,40 @@ import traceback
 import base64
 from state import State
 
+# Maximum assigned value to the evaluation function
+MAXVAL = 10000
+
+
+
+# Class to evaluate the board position
 class Valuator(object):
+
+  # Constructor loads the model
   def __init__(self):
     import torch
     from train import Net
+    self.reset()
     vals = torch.load("nets/value.pth", map_location=lambda storage, loc: storage)
     self.model = Net()
     self.model.load_state_dict(vals)
 
+  # Function called when the object is called
+  # Passes the board into the model and returns the value
   def __call__(self, s):
+    self.reset()
     brd = s.serialize()[None]
     output = self.model(torch.tensor(brd).float())
     return float(output.data[0][0])
 
+  def reset(self):
+    self.count = 0
 
-MAXVAL = 10000
+
+
+# Class to evaluate the board position
 class ClassicValuator(object):
+
+  # Assign seperate values to each piece
   values = {chess.PAWN: 1,
             chess.KNIGHT: 3,
             chess.BISHOP: 3,
@@ -31,6 +49,7 @@ class ClassicValuator(object):
             chess.QUEEN: 9,
             chess.KING: 0}
 
+  # Constructor resets the evaluation function
   def __init__(self):
     self.reset()
     self.memo = {}
@@ -158,12 +177,8 @@ def computer_move(s, v):
     print("  ",m)
   print(s.board.turn, "moving", move[0][1])
   s.board.push(move[0][1])
-<<<<<<< HEAD
 
 
-=======
-  
->>>>>>> 59f289542ad7841bd826f7769fc2b6fffa975eda
 
 # move given in algebraic notation
 @app.route("/move")
