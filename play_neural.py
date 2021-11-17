@@ -2,6 +2,7 @@ from __future__ import print_function
 from flask import Flask, Response, request
 import os
 import chess
+import torch
 import time
 import chess.svg
 import traceback
@@ -150,8 +151,8 @@ def explore_leaves(s, v):
 
 # chess board and "engine"
 s = State()
-# v = Valuator()
-v = ClassicValuator()
+v = Valuator()
+# v = ClassicValuator()
 
 
 
