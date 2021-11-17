@@ -158,12 +158,8 @@ def computer_move(s, v):
     print("  ",m)
   print(s.board.turn, "moving", move[0][1])
   s.board.push(move[0][1])
-<<<<<<< HEAD
 
 
-=======
-  
->>>>>>> 59f289542ad7841bd826f7769fc2b6fffa975eda
 
 # move given in algebraic notation
 @app.route("/move")
