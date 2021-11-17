@@ -32,7 +32,8 @@ class Valuator(object):
     brd = s.serialize()[None]
     output = self.model(torch.tensor(brd).float())
     return float(output.data[0][0])
-
+  # count; to count the number of nodes visited
+  # Function to reset count number
   def reset(self):
     self.count = 0
 
@@ -49,24 +50,30 @@ class ClassicValuator(object):
             chess.QUEEN: 9,
             chess.KING: 0}
 
-  # Constructor resets the evaluation function
+  # Constructor resets the evaluation function and initializes memo
   def __init__(self):
     self.reset()
     self.memo = {}
 
+  # Function to reset count number
   def reset(self):
     self.count = 0
 
+  # Function called when the object is called
+  # Passes the board into the model and returns the value
   def __call__(self, s):
     self.count += 1
     key = s.key()
+    # Checking if node is in memory
     if key not in self.memo:
       self.memo[key] = self.value(s)
     return self.memo[key]
 
+  # Function to return value of node not in memory
   def value(self, s):
     b = s.board
-    # game over values
+
+    # Game over values
     if b.is_game_over():
       if b.result() == "1-0":
         return MAXVAL
@@ -74,31 +81,45 @@ class ClassicValuator(object):
         return -MAXVAL
       else:
         return 0
-
+    
+    # Initialize value
     val = 0.0
-    # piece values
+    # Get a dictionary of pieces
     pm = s.board.piece_map()
+
+    # Iterate over each piece
     for x in pm:
+      # Assign value for each piece
       tval = self.values[pm[x].piece_type]
+      # If it a white piece add to value
       if pm[x].color == chess.WHITE:
         val += tval
+      # If it a black piece detract from value
       else:
         val -= tval
 
-    # add a number of legal moves term
+    # Add value for each legal move: white
     bak = b.turn
     b.turn = chess.WHITE
     val += 0.1 * b.legal_moves.count()
+    # Detract value for each legal move: black
     b.turn = chess.BLACK
     val -= 0.1 * b.legal_moves.count()
     b.turn = bak
 
     return val
 
+
+
+# Mini-max algorithm
 def computer_minimax(s, v, depth, a, b, big=False):
+
+  # If depth > 5 => too costly to venture further nodes
+  # or game over return value
   if depth >= 5 or s.board.is_game_over():
     return v(s)
-  # white is maximizing player
+
+  # Set return value based on who's turn it is
   turn = s.board.turn
   if turn == chess.WHITE:
     ret = -MAXVAL
@@ -107,7 +128,7 @@ def computer_minimax(s, v, depth, a, b, big=False):
   if big:
     bret = []
 
-  # can prune here with beam search
+  # Add all the neighbouring nodes to a list
   isort = []
   for e in s.board.legal_moves:
     s.board.push(e)
@@ -115,31 +136,45 @@ def computer_minimax(s, v, depth, a, b, big=False):
     s.board.pop()
   move = sorted(isort, key=lambda x: x[0], reverse=s.board.turn)
 
-  # beam search beyond depth 3
+  # If depth is beyond 3 then only view the most promising nodes
+  # as it is too costly to view all nodes
   if depth >= 3:
     move = move[:10]
 
+  # Iterate over each legal move
   for e in [x[1] for x in move]:
+    
+    # Perform the move on the board 
     s.board.push(e)
+
+    #  Recursive call to the mini-max algorithm to get the value of the 
+    # neighbouring nodes
     tval = computer_minimax(s, v, depth+1, a, b)
+    
+    # Remove the move 
     s.board.pop()
     if big:
       bret.append((tval, e))
+
+    # Alpha-beta pruning
     if turn == chess.WHITE:
       ret = max(ret, tval)
       a = max(a, ret)
       if a >= b:
-        break  # b cut-off
+        break  # Prune alpha
     else:
       ret = min(ret, tval)
       b = min(b, ret)
       if a >= b:
-        break  # a cut-off
+        break  # Prune beta
+
+  # Return the value
   if big:
     return ret, bret
   else:
     return ret
 
+# Function to explore the nodes and return the best move
 def explore_leaves(s, v):
   ret = []
   start = time.time()
@@ -152,9 +187,12 @@ def explore_leaves(s, v):
 
 # chess board and "engine"
 s = State()
-#v = Valuator()
+# v = Valuator()
 v = ClassicValuator()
 
+
+
+# Convert chess board into SVG graphical format 
 def to_svg(s):
   return base64.b64encode(chess.svg.board(board=s.board).encode('utf-8')).decode('utf-8')
 
@@ -167,8 +205,8 @@ def hello():
   return ret.replace('start', s.board.fen())
 
 
+# Function to make the computer move a piece
 def computer_move(s, v):
-  # computer move
   move = sorted(explore_leaves(s, v), key=lambda x: x[0], reverse=s.board.turn)
   if len(move) == 0:
     return
