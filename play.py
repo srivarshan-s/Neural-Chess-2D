@@ -1,5 +1,4 @@
 from __future__ import print_function
-from flask import Flask, Response, request
 import os
 import chess
 import time
@@ -8,13 +7,7 @@ import traceback
 import base64
 from state import State
 
-MAXVAL = 10000
-app = Flask(__name__)
-
-
-
 class Valuator(object):
-
   def __init__(self):
     import torch
     from train import Net
@@ -27,13 +20,9 @@ class Valuator(object):
     output = self.model(torch.tensor(brd).float())
     return float(output.data[0][0])
 
-  def reset(self):
-    self.count = 0
 
-
-
+MAXVAL = 10000
 class ClassicValuator(object):
-
   values = {chess.PAWN: 1,
             chess.KNIGHT: 3,
             chess.BISHOP: 3,
@@ -86,9 +75,6 @@ class ClassicValuator(object):
 
     return val
 
-
-
-
 def computer_minimax(s, v, depth, a, b, big=False):
   if depth >= 5 or s.board.is_game_over():
     return v(s)
@@ -134,8 +120,6 @@ def computer_minimax(s, v, depth, a, b, big=False):
   else:
     return ret
 
-
-
 def explore_leaves(s, v):
   ret = []
   start = time.time()
@@ -146,25 +130,21 @@ def explore_leaves(s, v):
   print("%.2f -> %.2f: explored %d nodes in %.3f seconds %d/sec" % (bval, cval, v.count, eta, int(v.count/eta)))
   return ret
 
-
-
 # chess board and "engine"
 s = State()
-# v = Valuator()
+#v = Valuator()
 v = ClassicValuator()
-
-
 
 def to_svg(s):
   return base64.b64encode(chess.svg.board(board=s.board).encode('utf-8')).decode('utf-8')
 
-
+from flask import Flask, Response, request
+app = Flask(__name__)
 
 @app.route("/")
 def hello():
   ret = open("index.html").read()
   return ret.replace('start', s.board.fen())
-
 
 
 def computer_move(s, v):
@@ -177,23 +157,7 @@ def computer_move(s, v):
     print("  ",m)
   print(s.board.turn, "moving", move[0][1])
   s.board.push(move[0][1])
-
-
-
-@app.route("/selfplay")
-def selfplay():
-  s = State()
-
-  ret = '<html><head>'
-  # self play
-  while not s.board.is_game_over():
-    computer_move(s, v)
-    ret += '<img width=600 height=600 src="data:image/svg+xml;base64,%s"></img><br/>' % to_svg(s)
-  print(s.board.result())
-
-  return ret
-
-
+  
 
 # move given in algebraic notation
 @app.route("/move")
@@ -221,8 +185,6 @@ def move():
     return response
   print("hello ran")
   return hello()
-
-
 
 # moves given as coordinates of piece moved
 @app.route("/move_coordinates")
@@ -254,8 +216,6 @@ def move_coordinates():
   )
   return response
 
-
-
 @app.route("/newgame")
 def newgame():
   s.board.reset()
@@ -264,7 +224,6 @@ def newgame():
     status=200
   )
   return response
-
 
 
 if __name__ == "__main__":
