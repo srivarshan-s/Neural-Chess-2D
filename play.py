@@ -2,6 +2,7 @@ from __future__ import print_function
 from flask import Flask, Response, request
 import os
 import chess
+# import torch
 import time
 import chess.svg
 import traceback
@@ -173,25 +174,10 @@ def computer_move(s, v):
   if len(move) == 0:
     return
   print("top 3:")
-  for i,m in enumerate(move[0:3]):
+  for _,m in enumerate(move[0:3]):
     print("  ",m)
   print(s.board.turn, "moving", move[0][1])
   s.board.push(move[0][1])
-
-
-
-@app.route("/selfplay")
-def selfplay():
-  s = State()
-
-  ret = '<html><head>'
-  # self play
-  while not s.board.is_game_over():
-    computer_move(s, v)
-    ret += '<img width=600 height=600 src="data:image/svg+xml;base64,%s"></img><br/>' % to_svg(s)
-  print(s.board.result())
-
-  return ret
 
 
 
@@ -268,13 +254,6 @@ def newgame():
 
 
 if __name__ == "__main__":
-  if os.getenv("SELFPLAY") is not None:
-    s = State()
-    while not s.board.is_game_over():
-      computer_move(s, v)
-      print(s.board)
-    print(s.board.result())
-  else:
-    app.run(debug=True)
+  app.run(debug=True)
 
 
