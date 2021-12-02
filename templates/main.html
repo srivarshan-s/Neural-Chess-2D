@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body{
+        background-image:url({{url_for('static',filename='back/background.jpg')}})
+        }
+
+input[type=submit]{
+  background-color: #B1A7FD;
+  border: none;
+}
+    </style>
+</head>
+<body>
+
+  <form action = "{{ url_for('hello') }}" method="POST" enctype="multipart/form-data" >
+
+            <div class="form-group" style=" width: 220px;margin-left: 400px;margin-top:300px">
+<!--                <img src="{{url_for('static', filename='personal_template.png')}}" width="550px"/>-->
+
+                <input type="submit" class="btn btn-primary btn-block mb-3" value="Play" style="">
+
+            </div>
+
+        </form>
+
+</body>
+</html>
