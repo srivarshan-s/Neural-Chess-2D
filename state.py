@@ -32,7 +32,7 @@ class State(object):
     # Iterates over each square on the chess board
     for i in range(64):
 
-      # Return the piece at that aprticular square
+      # Return the piece at that particular square
       pp = self.board.piece_at(i)
 
       if pp is not None:
