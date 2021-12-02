@@ -196,10 +196,13 @@ v = ClassicValuator()
 def to_svg(s):
   return base64.b64encode(chess.svg.board(board=s.board).encode('utf-8')).decode('utf-8')
 
-from flask import Flask, Response, request
+from flask import Flask, Response, request, render_template
+
 app = Flask(__name__)
 
-@app.route("/")
+
+
+@app.route("/", methods=["GET", "POST"])
 def hello():
   ret = open("index.html").read()
   return ret.replace('start', s.board.fen())
@@ -217,9 +220,14 @@ def computer_move(s, v):
   s.board.push(move[0][1])
 
 
+@app.route("/chess_play", methods=["GET", "POST"])
+def chess_play():
+  return render_template("main.html")
+
+
 
 # move given in algebraic notation
-@app.route("/move")
+@app.route("/move", methods=["GET", "POST"])
 def move():
   if not s.board.is_game_over():
     move = request.args.get('move',default="")
@@ -246,7 +254,7 @@ def move():
   return hello()
 
 # moves given as coordinates of piece moved
-@app.route("/move_coordinates")
+@app.route("/move_coordinates", methods=["GET", "POST"])
 def move_coordinates():
   if not s.board.is_game_over():
     source = int(request.args.get('from', default=''))
@@ -275,7 +283,7 @@ def move_coordinates():
   )
   return response
 
-@app.route("/newgame")
+@app.route("/newgame", methods=["GET", "POST"])
 def newgame():
   s.board.reset()
   response = app.response_class(
